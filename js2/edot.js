@@ -79,7 +79,7 @@
 		edotCubs[1].scale.x += 0.003 * delta;
 		edotCubs[1].scale.y += 0.003 * delta;
 		edotCubs[1].scale.z += 0.003 * delta;
-		edotCubs[2].position.y += 0.03 * delta;
+		edotCubs[2].position.y += 0.02 * delta;
 	}
 
 	function edotInit() {
