@@ -2,15 +2,10 @@
 (function() {
 	var onomStudioCanvas;
 	var edotCamera, edotScene, edotRenderer;
-	var edotCubs, edotMaterial, edotImg, edotData, edotTexture;
+	var edotCubs, edotMaterial, edotTexture;
 
 	function edotInitTexture() {
-		var edotCanvas = document.getElementById('edotCanvas');
-		var w = edotCanvas.offsetWidth;
-		var h = edotCanvas.offsetHeight;
-		var ctx = edotCanvas.getContext('2d');
-		edotData = new Uint8Array(ctx.getImageData(0, 0, w, h).data.buffer)
-		edotTexture = new THREE.DataTexture(edotData, w, h, THREE.RGBAFormat);
+		edotTexture = new THREE.Texture(onomStudioCanvas);
 		edotMaterial.map = edotTexture;
 	}
 
@@ -61,26 +56,17 @@
 
 	function edotInitHTMLTags() {
 		var body = document.getElementsByTagName('body')[0];
-
 		var div = document.createElement('div');
 		div.setAttribute('id', 'edotDiv');
 		body.insertBefore(div, body.childNodes[0]);
-
-		var canvas = document.createElement('canvas');
-		canvas.setAttribute('id', 'edotCanvas');
-		canvas.setAttribute('width', 1024);
-		canvas.setAttribute('height', 1024);
-		body.appendChild(canvas);
-		canvas.style.visibility = 'hidden';
 	}
 
 	function edotAnimate() {
 		requestAnimationFrame(edotAnimate);
-		if (!edotImg || edotImg.complete) {
-			edotImg = new Image();
-			edotImg.src = onomStudioCanvas.toDataURL();
-			setTimeout(edotUpdate, 0);
-		}
+		edotUpdateMotion();
+		edotTexture.needsUpdate = true;
+		edotRenderer.render(edotScene, edotCamera);
+		edotStats.update();
 		var w = window.innerWidth - 50;
 		edotRenderer.setSize(w, w * (9 / 16));
 	}
@@ -93,30 +79,6 @@
 		edotCubs[1].scale.y += 0.003 * delta;
 		edotCubs[1].scale.z += 0.003 * delta;
 		edotCubs[2].position.y += 0.03 * delta;
-	}
-
-	function edotUpdateTexture() {
-		var edotCanvas = document.getElementById('edotCanvas');
-		edotCanvas.style.display = 'block';
-		var w = edotCanvas.offsetWidth;
-		var h = edotCanvas.offsetHeight;
-		var ctx = edotCanvas.getContext('2d');
-		ctx.drawImage(edotImg,
-			0, 0, edotImg.width, edotImg.height,
-			0, 0, w, h);
-		edotData.set(ctx.getImageData(0, 0, w, h).data);
-		edotCanvas.style.display = 'none';
-		edotTexture.needsUpdate = true;
-	}
-
-	function edotUpdate() {
-		if (edotImg.complete == false) {
-			setTimeout(edotUpdate, 0);
-			return;
-		}
-		edotUpdateMotion();
-		edotUpdateTexture();
-		edotRenderer.render(edotScene, edotCamera);
 	}
 
 	function edotInit() {
