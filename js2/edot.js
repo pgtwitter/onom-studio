@@ -3,6 +3,7 @@
 	var onomStudioCanvas;
 	var edotCamera, edotScene, edotRenderer;
 	var edotCubs, edotMaterial, edotTexture;
+	var edotStats;
 
 	function edotInitTexture() {
 		edotTexture = new THREE.Texture(onomStudioCanvas);
@@ -87,6 +88,8 @@
 		edotInitRenderer();
 		edotInitMesh();
 		(document.getElementById('edotDiv')).appendChild(edotRenderer.domElement);
+		edotStats = new Stats();
+		(document.getElementById('edotDiv')).appendChild(edotStats.dom);
 	}
 
 	window.edot = function() {
