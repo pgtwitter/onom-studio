@@ -75,11 +75,11 @@
 	function edotUpdateMotion() {
 		var time = Date.now() * 0.001;
 		var delta = Math.sin(time);
-		edotCubs[0].rotation.y = 0.3 * delta;
-		edotCubs[1].scale.x += 0.003 * delta;
-		edotCubs[1].scale.y += 0.003 * delta;
-		edotCubs[1].scale.z += 0.003 * delta;
-		edotCubs[2].position.y += 0.02 * delta;
+		edotCubs[0].rotation.y = Math.PI / 4 + 0.7 * delta;
+		edotCubs[1].scale.x = 1 + 0.2 * delta;
+		edotCubs[1].scale.y = 1 + 0.2 * delta;
+		edotCubs[1].scale.z = 1 + 0.2 * delta;
+		edotCubs[2].position.y = 2 + 0.7 * delta;
 	}
 
 	function edotInit() {
