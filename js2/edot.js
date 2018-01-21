@@ -92,17 +92,19 @@
 		(document.getElementById('edotDiv')).appendChild(edotStats.dom);
 	}
 
-	window.edot = function() {
+	function edot() {
 		edotInit();
 		edotAnimate();
 	}
 
-	window.edotWait = function() {
+	function edotWait() {
 		if (document.getElementById('three'))
 			edot();
 		else
 			setTimeout(edotWait, 100);
 	}
+	
+	document.addEventListener('DOMContentLoaded', function() {
+		edotWait();
+	});
 })();
-
-setTimeout(edotWait, 100);
