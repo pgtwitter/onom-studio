@@ -3,6 +3,7 @@
 	var edotMidiInput = {
 		array: [],
 	};
+	var edotMidiCtrls;
 	var edotMidiGui = {
 		selector: null,
 	};
@@ -17,17 +18,13 @@
 
 	function edotMidiNoteOn(channel, noteNumber, velocity) {
 		console.log('On', channel, noteNumber, velocity);
-		switch (noteNumber) {
-			case 0:
-				controllers['f0_cameraPosition'].setValue(100 * edotMidiOneToOne(velocity));
-				break;
-			case 1:
-				var v = velocity == 0 ? 0.1 : 20.0 * edotMidiZeroToOne(velocity);
-				controllers['f4_width'].setValue(v);
-				break;
-			default:
-				break;
-		}
+		if (!edotMidiSettings) return;
+		var ctrl = edotMidiCtrls[edotMidiSettings[noteNumber]];
+		if (!ctrl) return;
+		if (ctrl.__max)
+			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
+		else if (!ctrl.__color)
+			ctrl.setValue(velocity > 64)
 	}
 
 	function edotMidiNoteOff(channel, noteNumber, velocity) {
@@ -100,7 +97,18 @@
 		edotMidiGui.selector = document.getElementById('inputDevice');
 	}
 
+	function edotMidiPickupController(gui, obj) {
+		gui.__controllers.forEach(function(ctrl) {
+			obj[ctrl.property] = ctrl;
+		});
+		Object.keys(gui.__folders).forEach(function(key) {
+			edotMidiPickupController(gui.__folders[key], obj);
+		});
+		return obj;
+	}
+
 	document.addEventListener('DOMContentLoaded', function() {
+		edotMidiCtrls = edotMidiPickupController(window.gui, {});
 		edotMidiInitHTMLTags();
 		edotMidiInitMidiDevices();
 	});

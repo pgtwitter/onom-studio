@@ -566,10 +566,7 @@ function init() {
     exportGif2();
   };
 
-  window.controllers = {
-  	'f0_cameraPosition': f0_cameraPosition,
-  	'f4_width': f4_width,
-  }
+  window.gui= gui;
 };
 window.onload = init();
 

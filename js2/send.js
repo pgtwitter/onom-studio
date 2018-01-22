@@ -6,7 +6,6 @@
 	};
 	var edotMidiGui = {
 		ctrl: {},
-		list: ['f0_cameraPosition', 'f4_width'],
 		selector: null,
 	};
 
@@ -35,19 +34,16 @@
 		});
 	}
 
-	function edotMidiAddGUI(gui, name, id) {
-		edotMidiGui.ctrl[name] = 0.0;
-		gui.add(edotMidiGui.ctrl, name, 0, 127, 1)
-			.onChange(function(value) {
-				edotMidiOutput.array[edotMidiGui.selector.value]
-					.send(['0x9' + edotMidiOutput.channel, id, parseInt(value)]);
-			})
-			.onFinishChange(function(value) {
-				edotMidiOutput.array[edotMidiGui.selector.value]
-					.send(['0x9' + edotMidiOutput.channel, id, parseInt(value)]);
-				edotMidiOutput.array[edotMidiGui.selector.value]
-					.send(['0x8' + edotMidiOutput.channel, id, '0']);
-			});
+	function edotMidiAddGUI(gui) {
+		Object.keys(edotMidiSettings).forEach(function(noteNumber) {
+			edotMidiGui.ctrl[edotMidiSettings[noteNumber]] = 0.0;
+			gui.add(edotMidiGui.ctrl, edotMidiSettings[noteNumber], 0, 127, 1)
+				.onChange(function(value) {
+					edotMidiOutput.array[edotMidiGui.selector.value]
+						.send(['0xB' + edotMidiOutput.channel, noteNumber, parseInt(value)]);
+				});
+		});
+
 	}
 
 	function edotMidiInitHTMLTags() {
@@ -64,10 +60,7 @@
 
 	function edotMidiInitUI() {
 		edotMidiInitHTMLTags();
-		var gui = new dat.GUI();
-		edotMidiGui.list.forEach(function(name, index) {
-			edotMidiAddGUI(gui, name, index);
-		});
+		edotMidiAddGUI(new dat.GUI())
 	}
 
 	document.addEventListener('DOMContentLoaded', function() {
