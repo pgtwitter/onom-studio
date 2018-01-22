@@ -47,6 +47,7 @@
 			var noteNumber = event.data[1];
 			var velocity = event.data[2];
 			switch (event.data[0] & 0xf0) {
+				case 0xb0:
 				case 0x90:
 					edotMidiNoteOn(channel, noteNumber, velocity);
 					break;
