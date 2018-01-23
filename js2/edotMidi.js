@@ -6,6 +6,7 @@
 		data: {},
 	};
 	var edotMidiCtrls = {};
+	var edotMidiCtrls2 = {};
 	var edotMidiSetting = {
 		gui: (new dat.GUI()),
 		data: {
@@ -90,11 +91,23 @@
 		});
 	}
 
-	function edotMidiUpdateSettings() {
+	function edotMidiUpdateSettings(currKey) {
 		edotMidiSettings = {};
+		var currValue = edotMidiSetting.data[currKey];
+		edotMidiSettings[currValue] = currKey;
 		Object.keys(edotMidiSetting.data).forEach(function(key) {
 			var value = edotMidiSetting.data[key];
-			edotMidiSettings[value] = key;
+			if (value > -1 && value != currValue) {
+				edotMidiSettings[value] = key;
+			}
+		});
+		Object.keys(edotMidiSetting.data).forEach(function(key) {
+			var value = edotMidiSetting.data[key];
+			if (edotMidiSettings[value] !== void 0 &&
+				edotMidiSettings[value] != key) {
+				edotMidiSetting.data[key] = -1;
+				edotMidiCtrls2[key].updateDisplay();
+			}
 		});
 	}
 
@@ -103,10 +116,11 @@
 			edotMidiCtrls[ctrl.property] = ctrl;
 			if (edotMidiSetting.data[ctrl.property] === void 0)
 				edotMidiSetting.data[ctrl.property] = -1;
-			t.add(edotMidiSetting.data, ctrl.property, -1, 127, 1)
+			var ctrl2 = t.add(edotMidiSetting.data, ctrl.property, -1, 127, 1)
 				.onFinishChange(function(value) {
-					edotMidiUpdateSettings();
+					edotMidiUpdateSettings(this.property);
 				});
+			edotMidiCtrls2[ctrl.property] = ctrl2;
 		});
 		Object.keys(f.__folders).forEach(function(key) {
 			var nf = t.addFolder(key);
