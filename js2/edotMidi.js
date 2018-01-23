@@ -19,14 +19,6 @@
 		},
 	};
 
-	function ZeroToOne(x) {
-		return (x / 127.0);
-	}
-
-	function OneToOne(x) {
-		return (x / 127.0) * 2.0 - 1.0;
-	}
-
 	function noteOn(channel, noteNumber, velocity) {
 		console.log('On', channel, noteNumber, velocity);
 		if (!Settings) return;
