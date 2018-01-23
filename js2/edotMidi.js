@@ -5,8 +5,10 @@
 		names: {},
 		data: {},
 	};
-	var CtrlsOnom = {};
-	var CtrlsMIDI = {};
+	var Ctrls = {
+		Onom: {},
+		MIDI: {},
+	};
 	var Setting = {
 		gui: (new dat.GUI()),
 		data: {
@@ -22,7 +24,7 @@
 	function noteOn(channel, noteNumber, velocity) {
 		console.log('On', channel, noteNumber, velocity);
 		if (!Settings) return;
-		var ctrl = CtrlsOnom[Settings[noteNumber]];
+		var ctrl = Ctrls.Onom[Settings[noteNumber]];
 		if (!ctrl) return;
 		if (ctrl.__max)
 			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
@@ -108,21 +110,21 @@
 			if (Settings[value] !== void 0 &&
 				Settings[value] != key) {
 				Setting.data[key] = -1;
-				CtrlsMIDI[key].updateDisplay();
+				Ctrls.MIDI[key].updateDisplay();
 			}
 		});
 	}
 
 	function createSettingGUI(f, t) {
 		f.__controllers.forEach(function(ctrl) {
-			CtrlsOnom[ctrl.property] = ctrl;
+			Ctrls.Onom[ctrl.property] = ctrl;
 			if (Setting.data[ctrl.property] === void 0)
 				Setting.data[ctrl.property] = -1;
 			var ctrl2 = t.add(Setting.data, ctrl.property, -1, 127, 1)
 				.onFinishChange(function(value) {
 					updateSettings(this.property);
 				});
-			CtrlsMIDI[ctrl.property] = ctrl2;
+			Ctrls.MIDI[ctrl.property] = ctrl2;
 		});
 		Object.keys(f.__folders).forEach(function(key) {
 			var nf = t.addFolder(key);
