@@ -1,13 +1,13 @@
 ;
 (function() {
-	var edotMidiInput = {
+	var Input = {
 		array: [],
 		names: {},
 		data: {},
 	};
-	var edotMidiCtrls = {};
-	var edotMidiCtrls2 = {};
-	var edotMidiSetting = {
+	var CtrlsOnom = {};
+	var CtrlsMIDI = {};
+	var Setting = {
 		gui: (new dat.GUI()),
 		data: {
 			'f0_cameraPosition': 0,
@@ -19,18 +19,18 @@
 		},
 	};
 
-	function edotMidiZeroToOne(x) {
+	function ZeroToOne(x) {
 		return (x / 127.0);
 	}
 
-	function edotMidiOneToOne(x) {
+	function OneToOne(x) {
 		return (x / 127.0) * 2.0 - 1.0;
 	}
 
-	function edotMidiNoteOn(channel, noteNumber, velocity) {
+	function noteOn(channel, noteNumber, velocity) {
 		console.log('On', channel, noteNumber, velocity);
-		if (!edotMidiSettings) return;
-		var ctrl = edotMidiCtrls[edotMidiSettings[noteNumber]];
+		if (!Settings) return;
+		var ctrl = CtrlsOnom[Settings[noteNumber]];
 		if (!ctrl) return;
 		if (ctrl.__max)
 			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
@@ -47,17 +47,17 @@
 		}
 	}
 
-	function edotMidiNoteOff(channel, noteNumber, velocity) {
+	function noteOff(channel, noteNumber, velocity) {
 		console.log('Off', channel, noteNumber, velocity);
 	}
 
-	function edotMidiSwitchDevice(index) {
-		edotMidiInput.array.forEach(function(element) {
+	function switchDevice(index) {
+		Input.array.forEach(function(element) {
 			element.onmidimessage = null;
 		});
 		if (index === '')
 			return;
-		edotMidiInput.array[index].onmidimessage = function(event) {
+		Input.array[index].onmidimessage = function(event) {
 			if (event.data.length < 3)
 				return;
 			var channel = event.data[0] & 0x0f;
@@ -66,10 +66,10 @@
 			switch (event.data[0] & 0xf0) {
 				case 0xb0:
 				case 0x90:
-					edotMidiNoteOn(channel, noteNumber, velocity);
+					noteOn(channel, noteNumber, velocity);
 					break;
 				case 0x80:
-					edotMidiNoteOff(channel, noteNumber, velocity);
+					noteOff(channel, noteNumber, velocity);
 					break;
 				default:
 					break;
@@ -77,7 +77,7 @@
 		};
 	}
 
-	function edotMidiInitMidiDevices() {
+	function initMidiDevices() {
 		if (!navigator.requestMIDIAccess)
 			return alert('This browser does not seem to support Web MIDI.');
 		navigator.requestMIDIAccess({
@@ -85,64 +85,64 @@
 		}).then(function(midiAccess) {
 			var inputIterator = midiAccess.inputs.values();
 			for (var i = inputIterator.next(); !i.done; i = inputIterator.next()) {
-				edotMidiInput.array.push(i.value);
-				edotMidiInput.names[i.value.name] = edotMidiInput.array.length - 1;
+				Input.array.push(i.value);
+				Input.names[i.value.name] = Input.array.length - 1;
 			}
-			if (edotMidiInput.array.length > 0) {
-				edotMidiInput.data.device = 0;
-				edotMidiSetting.gui.add(edotMidiInput.data, 'device', edotMidiInput.names)
+			if (Input.array.length > 0) {
+				Input.data.device = 0;
+				Setting.gui.add(Input.data, 'device', Input.names)
 					.onFinishChange(function(value) {
-						edotMidiSwitchDevice(value);
+						switchDevice(value);
 					});
-				edotMidiSwitchDevice(edotMidiInput.data.device);
+				switchDevice(Input.data.device);
 			}
 		}, function(error) {
 			console.dir(error);
 		});
 	}
 
-	function edotMidiUpdateSettings(currKey) {
-		edotMidiSettings = {};
-		var currValue = edotMidiSetting.data[currKey];
-		edotMidiSettings[currValue] = currKey;
-		Object.keys(edotMidiSetting.data).forEach(function(key) {
-			var value = edotMidiSetting.data[key];
+	function updateSettings(currKey) {
+		Settings = {};
+		var currValue = Setting.data[currKey];
+		Settings[currValue] = currKey;
+		Object.keys(Setting.data).forEach(function(key) {
+			var value = Setting.data[key];
 			if (value > -1 && value != currValue) {
-				edotMidiSettings[value] = key;
+				Settings[value] = key;
 			}
 		});
-		Object.keys(edotMidiSetting.data).forEach(function(key) {
-			var value = edotMidiSetting.data[key];
-			if (edotMidiSettings[value] !== void 0 &&
-				edotMidiSettings[value] != key) {
-				edotMidiSetting.data[key] = -1;
-				edotMidiCtrls2[key].updateDisplay();
+		Object.keys(Setting.data).forEach(function(key) {
+			var value = Setting.data[key];
+			if (Settings[value] !== void 0 &&
+				Settings[value] != key) {
+				Setting.data[key] = -1;
+				CtrlsMIDI[key].updateDisplay();
 			}
 		});
 	}
 
-	function edotMidiCreateSettingGUI(f, t) {
+	function createSettingGUI(f, t) {
 		f.__controllers.forEach(function(ctrl) {
-			edotMidiCtrls[ctrl.property] = ctrl;
-			if (edotMidiSetting.data[ctrl.property] === void 0)
-				edotMidiSetting.data[ctrl.property] = -1;
-			var ctrl2 = t.add(edotMidiSetting.data, ctrl.property, -1, 127, 1)
+			CtrlsOnom[ctrl.property] = ctrl;
+			if (Setting.data[ctrl.property] === void 0)
+				Setting.data[ctrl.property] = -1;
+			var ctrl2 = t.add(Setting.data, ctrl.property, -1, 127, 1)
 				.onFinishChange(function(value) {
-					edotMidiUpdateSettings(this.property);
+					updateSettings(this.property);
 				});
-			edotMidiCtrls2[ctrl.property] = ctrl2;
+			CtrlsMIDI[ctrl.property] = ctrl2;
 		});
 		Object.keys(f.__folders).forEach(function(key) {
 			var nf = t.addFolder(key);
 			if (f.__folders[key].closed == false)
 				nf.open();
-			edotMidiCreateSettingGUI(f.__folders[key], nf);
+			createSettingGUI(f.__folders[key], nf);
 		});
 	}
 
 	document.addEventListener('DOMContentLoaded', function() {
-		edotMidiInitMidiDevices();
-		edotMidiCreateSettingGUI(window.gui, edotMidiSetting.gui);
-		edotMidiUpdateSettings();
+		initMidiDevices();
+		createSettingGUI(window.gui, Setting.gui);
+		updateSettings();
 	});
 })();
