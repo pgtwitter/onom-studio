@@ -2,10 +2,19 @@
 (function() {
 	var edotMidiInput = {
 		array: [],
+		names: {},
+		data: {},
 	};
-	var edotMidiCtrls;
-	var edotMidiGui = {
-		selector: null,
+	var edotMidiCtrls = {};
+	var edotMidiSetting = {
+		gui: (new dat.GUI()),
+		data: {
+			'f0_cameraPosition': 0,
+			'f4_width': 1,
+			'f3_count': 16,
+			'f0_cameraSpin': 65,
+			'f0_cameraShake': 66,
+		},
 	};
 
 	function edotMidiZeroToOne(x) {
@@ -61,55 +70,55 @@
 		if (!navigator.requestMIDIAccess)
 			return alert('This browser does not seem to support Web MIDI.');
 		navigator.requestMIDIAccess({
-			sysex: true
+			sysex: false
 		}).then(function(midiAccess) {
 			var inputIterator = midiAccess.inputs.values();
 			for (var i = inputIterator.next(); !i.done; i = inputIterator.next()) {
 				edotMidiInput.array.push(i.value);
+				edotMidiInput.names[i.value.name] = edotMidiInput.array.length - 1;
 			}
-			edotMidiInput.array.forEach(function(element, index) {
-				var option = document.createElement('option');
-				option.appendChild(document.createTextNode(element.name));
-				option.setAttribute('value', index);
-				edotMidiGui.selector.appendChild(option);
-			});
-			edotMidiGui.selector.addEventListener('change', function() {
-				edotMidiSwitchDevice(this.value);
-			}, false);
 			if (edotMidiInput.array.length > 0) {
-				edotMidiGui.selector.selectedIndex = 0;
-				edotMidiGui.selector.dispatchEvent(new Event('change'));
+				edotMidiInput.data.device = 0;
+				edotMidiSetting.gui.add(edotMidiInput.data, 'device', edotMidiInput.names)
+					.onFinishChange(function(value) {
+						edotMidiSwitchDevice(value);
+					});
+				edotMidiSwitchDevice(edotMidiInput.data.device);
 			}
 		}, function(error) {
 			console.dir(error);
 		});
 	}
 
-	function edotMidiInitHTMLTags() {
-		var body = document.getElementsByTagName('body')[0];
-		var div = document.createElement('div');
-		div.setAttribute('id', 'edotMidiDiv');
-		div.style.position = 'absolute';
-		var select = document.createElement('select');
-		select.setAttribute('id', 'inputDevice');
-		div.appendChild(select);
-		body.insertBefore(div, body.childNodes[0]);
-		edotMidiGui.selector = document.getElementById('inputDevice');
+	function edotMidiUpdateSettings() {
+		edotMidiSettings = {};
+		Object.keys(edotMidiSetting.data).forEach(function(key) {
+			var value = edotMidiSetting.data[key];
+			edotMidiSettings[value] = key;
+		});
 	}
 
-	function edotMidiPickupController(gui, obj) {
-		gui.__controllers.forEach(function(ctrl) {
-			obj[ctrl.property] = ctrl;
+	function edotMidiCreateSettingGUI(f, t) {
+		f.__controllers.forEach(function(ctrl) {
+			edotMidiCtrls[ctrl.property] = ctrl;
+			if (edotMidiSetting.data[ctrl.property] === void 0)
+				edotMidiSetting.data[ctrl.property] = -1;
+			t.add(edotMidiSetting.data, ctrl.property, -1, 127, 1)
+				.onFinishChange(function(value) {
+					edotMidiUpdateSettings();
+				});
 		});
-		Object.keys(gui.__folders).forEach(function(key) {
-			edotMidiPickupController(gui.__folders[key], obj);
+		Object.keys(f.__folders).forEach(function(key) {
+			var nf = t.addFolder(key);
+			if (f.__folders[key].closed == false)
+				nf.open();
+			edotMidiCreateSettingGUI(f.__folders[key], nf);
 		});
-		return obj;
 	}
 
 	document.addEventListener('DOMContentLoaded', function() {
-		edotMidiCtrls = edotMidiPickupController(window.gui, {});
-		edotMidiInitHTMLTags();
 		edotMidiInitMidiDevices();
+		edotMidiCreateSettingGUI(window.gui, edotMidiSetting.gui);
+		edotMidiUpdateSettings();
 	});
 })();
