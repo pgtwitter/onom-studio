@@ -12,6 +12,7 @@
 		data: {
 			'f0_cameraPosition': 0,
 			'f4_width': 1,
+			'f4_color': 2,
 			'f3_count': 16,
 			'f0_cameraSpin': 65,
 			'f0_cameraShake': 66,
@@ -35,6 +36,15 @@
 			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
 		else if (!ctrl.__color)
 			ctrl.setValue(velocity > 64)
+		else {
+			var obj = {
+				h: parseInt(velocity / 127.0 * 360.0),
+				s: ctrl.__color.s,
+				v: ctrl.__color.v,
+			};
+			ctrl.__color.h = parseInt(velocity / 127.0 * 360.0);
+			ctrl.setValue(ctrl.__color.toHexString());
+		}
 	}
 
 	function edotMidiNoteOff(channel, noteNumber, velocity) {
