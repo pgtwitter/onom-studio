@@ -53,6 +53,8 @@
 			if (event.data.length < 3)
 				return;
 			var channel = event.data[0] & 0x0f;
+			if (channel != Input.data.channel)
+				return;
 			var noteNumber = event.data[1];
 			var velocity = event.data[2];
 			switch (event.data[0] & 0xf0) {
@@ -86,6 +88,10 @@
 					.onFinishChange(function(value) {
 						switchDevice(value);
 					});
+				Input.data.channel = 0;
+				var channels = {};
+				for (var i = 0; i < 16; i++) channels['ch' + (i + 1)] = i;
+				Setting.gui.add(Input.data, 'channel', channels);
 				switchDevice(Input.data.device);
 			}
 		}, function(error) {
