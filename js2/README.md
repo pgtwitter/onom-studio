@@ -1,7 +1,7 @@
 1. dat.gui.jsのGUIインスタンスをwindowに登録するように追加
 
   ```
-   var gui = new dat.GUI();
+   // var gui = new dat.GUI();
    window.gui = gui;
   ```
 
