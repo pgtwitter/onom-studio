@@ -26,11 +26,11 @@
 		if (!Settings) return;
 		var ctrl = Ctrls.Onom[Settings[noteNumber]];
 		if (!ctrl) return;
-		if (ctrl.__max)
+		if (ctrl.__max !== void 0)
 			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
 		else if (ctrl.__prev !== void 0)
 			ctrl.setValue(velocity > 64)
-		else {
+		else if (ctrl.__color !== void 0) {
 			if (ctrl.__color.s == 0.0)
 				ctrl.__color.v = velocity / 127.0;
 			else
