@@ -31,13 +31,11 @@
 		else if (!ctrl.__color)
 			ctrl.setValue(velocity > 64)
 		else {
-			var obj = {
-				h: parseInt(velocity / 127.0 * 360.0),
-				s: ctrl.__color.s,
-				v: ctrl.__color.v,
-			};
-			ctrl.__color.h = parseInt(velocity / 127.0 * 360.0);
-			ctrl.setValue(ctrl.__color.toHexString());
+			if (ctrl.__color.s == 0.0)
+				ctrl.__color.v = velocity / 127.0;
+			else
+				ctrl.__color.h = parseInt(velocity / 127.0 * 360.0);
+			ctrl.setValue(ctrl.__color.toOriginal());
 		}
 	}
 
