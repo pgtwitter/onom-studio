@@ -28,7 +28,7 @@
 		if (!ctrl) return;
 		if (ctrl.__max)
 			ctrl.setValue(((ctrl.__max - ctrl.__min) / 127.0) * velocity + ctrl.__min);
-		else if (!ctrl.__color)
+		else if (ctrl.__prev !== void 0)
 			ctrl.setValue(velocity > 64)
 		else {
 			if (ctrl.__color.s == 0.0)
