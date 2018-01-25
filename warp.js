@@ -1,8 +1,8 @@
 function init() {
   var scene = new THREE.Scene();
   var frame = 0;
-  var canvasWidth = 1280;
-  var canvasHeight = 720;
+  var canvasWidth = 512;
+  var canvasHeight = 512;
   var width  = canvasWidth;
   var height = canvasHeight;
   var time = 0;
